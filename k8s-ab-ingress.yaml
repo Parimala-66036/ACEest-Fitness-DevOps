@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aceest-fitness-ab-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: variant-a.aceest.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aceest-fitness-blue-service
+                port:
+                  number: 5000
+
+    - host: variant-b.aceest.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aceest-fitness-green-service
+                port:
+                  number: 5000

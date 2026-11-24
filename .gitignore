@@ -5,3 +5,5 @@ __pycache__/
 *.pyc
 .env
 *.db
+kubectl
+minikube-linux-amd64

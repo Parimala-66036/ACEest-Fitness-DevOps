@@ -41,10 +41,16 @@ def home():
     return "<h1>Welcome to ACEest Fitness & Gym!</h1>"
 
 
+# @app.route("/health")
+# def health():
+#     return jsonify({"status": "healthy"})
+
 @app.route("/health")
 def health():
-    return jsonify({"status": "healthy"})
-
+    return jsonify({
+        "status": "healthy",
+        "version": os.environ.get("APP_VERSION", "unknown")
+    })
 
 @app.route("/members", methods=["POST"])
 def register_member():
