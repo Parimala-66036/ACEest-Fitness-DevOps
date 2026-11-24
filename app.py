@@ -81,14 +81,31 @@ def register_member():
         }), 409
 
 
+
 @app.route("/members", methods=["GET"])
 def get_members():
     db = get_db()
-    members = db.execute(
-        "SELECT * FROM members ORDER BY id"
-    ).fetchall()
+
+    search = request.args.get("search", "").strip()
+
+    if search:
+        search_term = f"%{search}%"
+
+        members = db.execute(
+            """
+            SELECT * FROM members
+            WHERE name LIKE ? OR email LIKE ?
+            ORDER BY id
+            """,
+            (search_term, search_term)
+        ).fetchall()
+    else:
+        members = db.execute(
+            "SELECT * FROM members ORDER BY id"
+        ).fetchall()
 
     return jsonify([dict(member) for member in members])
+
 
 
 with app.app_context():

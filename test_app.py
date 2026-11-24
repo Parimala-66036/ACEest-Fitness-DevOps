@@ -71,3 +71,23 @@ def test_missing_member_details(client):
     })
 
     assert response.status_code == 400
+
+def test_search_member_by_name(client):
+    client.post("/members", json={
+        "name": "Rahul Kumar",
+        "email": "rahul@example.com",
+        "phone": "9876543210"
+    })
+
+    response = client.get("/members?search=Rahul")
+
+    assert response.status_code == 200
+    assert len(response.json) == 1
+    assert response.json[0]["name"] == "Rahul Kumar"
+
+
+def test_search_member_no_match(client):
+    response = client.get("/members?search=Unknown")
+
+    assert response.status_code == 200
+    assert response.json == []
