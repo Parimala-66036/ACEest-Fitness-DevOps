@@ -1,16 +1,73 @@
 
-from app import app
+import pytest
+from app import app, init_db
 
 
-def test_home_page():
-    client = app.test_client()
+@pytest.fixture
+def client(tmp_path):
+    app.config["TESTING"] = True
+    app.config["DATABASE"] = str(tmp_path / "test_gym.db")
+
+    with app.app_context():
+        init_db()
+
+    with app.test_client() as client:
+        yield client
+
+
+def test_home_page(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Welcome to ACEest Fitness & Gym!" in response.data
+    assert b"ACEest Fitness & Gym" in response.data
 
 
-def test_health_check():
-    client = app.test_client()
+def test_health_check(client):
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json == {"status": "healthy"}
+    assert response.json["status"] == "healthy"
+
+
+def test_register_member(client):
+    response = client.post("/members", json={
+        "name": "Rahul Kumar",
+        "email": "rahul@example.com",
+        "phone": "9876543210"
+    })
+
+    assert response.status_code == 201
+    assert response.json["message"] == "Member registered successfully"
+
+
+def test_get_members(client):
+    client.post("/members", json={
+        "name": "Rahul Kumar",
+        "email": "rahul@example.com",
+        "phone": "9876543210"
+    })
+
+    response = client.get("/members")
+
+    assert response.status_code == 200
+    assert len(response.json) == 1
+    assert response.json[0]["name"] == "Rahul Kumar"
+
+
+def test_duplicate_email(client):
+    member = {
+        "name": "Rahul Kumar",
+        "email": "rahul@example.com",
+        "phone": "9876543210"
+    }
+
+    client.post("/members", json=member)
+    response = client.post("/members", json=member)
+
+    assert response.status_code == 409
+
+
+def test_missing_member_details(client):
+    response = client.post("/members", json={
+        "name": "Rahul Kumar"
+    })
+
+    assert response.status_code == 400
