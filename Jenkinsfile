@@ -32,6 +32,28 @@ pipeline {
             }
         }
 
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.projectKey=aceest-fitness \
+                              -Dsonar.projectName="ACEest Fitness" \
+                              -Dsonar.sources=. \
+                              -Dsonar.tests=. \
+                              -Dsonar.test.inclusions=test_*.py \
+                              -Dsonar.exclusions=.venv/**,**/__pycache__/**,**/*.db \
+                              -Dsonar.python.version=3.11 \
+                              -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh '''
@@ -95,3 +117,4 @@ pipeline {
         }
     }
 }
+
