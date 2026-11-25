@@ -89,8 +89,8 @@ pipeline {
                 ]) {
                     sh '''
                         set +x
-                        printf "%s" "$DOCKERHUB_TOKEN" | docker login \
-                            -u "$DOCKERHUB_USER" --password-stdin
+                        printf "%s" "$(printf '%s' "$DOCKERHUB_TOKEN" | tr -d '\r\n')" | docker login \
+                            -u "$(printf '%s' "$DOCKERHUB_USER" | tr -d '\r\n')" --password-stdin
 
                         docker push ${IMAGE_NAME}:build-${BUILD_NUMBER}
                         docker push ${IMAGE_NAME}:latest
